@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://Jose-Eduardo-Hrz.github.io',
+	base: '/lpoo',
 	integrations: [
 		starlight({
 			title: 'LPOO',
