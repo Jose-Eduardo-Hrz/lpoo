@@ -1,0 +1,192 @@
+---
+title: Entrada de Datos
+---
+
+## InputStream
+
+Existe una propiedad en java llamada `System.in`, el cual, es un flujo de entrada estándar, dicho en otras palabras, es la propiedad que permite realizar una conexión entre nuestro programa y el teclado.
+
+La propiedad `System.in` retorna un objeto de tipo `InputStream`, este objeto contiene métodos que permiten obtener los datos del teclado en bits.
+
+### Metodos más utilizados
+
+#### read() : int
+
+Lee un byte de datos del flujo de entrada
+
+```java 
+// Ejemplo.java
+import java.io.IOException;
+import java.io.InputStream;
+public class Ejemplo {
+    public static void main(String[] args) {
+        InputStream entrada = System.in;
+        try {
+            System.out.println("Introduce un caracter:");
+            int caracter = entrada.read();
+            System.out.println( (char) caracter );
+        } catch (IOException ex) {
+            System.err.println("Ocurrio un error al obtener el dato");
+        }
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce un caracter:"
+e
+e
+```
+
+#### read( array : byte[] ) : int
+
+Lee bytes de la secuencia y los almacena en la matriz especificada
+
+```java 
+// Ejemplo.java
+import java.io.IOException;
+import java.io.InputStream;
+public class Ejemplo {
+    public static void main(String[] args) {
+        InputStream entrada = System.in;
+        byte [] array = new byte[4];
+        try {
+            System.out.println("Introduce una cadena de 4 caracteres:");
+            entrada.read( array );
+            System.out.println( (char) array[0] );
+            System.out.println( (char) array[1] );
+            System.out.println( (char) array[2] );
+            System.out.println( (char) array[3] );
+        } catch (IOException ex) {
+            System.err.println("Ocurrio un error al obtener los dato");
+        }
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce una cadena de 4 caracteres:"
+abcd
+a
+b
+c
+d
+```
+
+:::caution[Cuidado]
+Para utilizar estos métodos se requiere de un bloque de excepciones `try { ...| } catch( Exception e ) { ...| }` para manejar errores, ya que, es muy probable que desde el teclado se ingrese datos no soportados o datos con capacidad mayor.
+:::
+
+### Limitantes
+
+Como se puede observar, esta clase requiere un `bloque de excepciones` para manejar errores en `tiempo de ejecución`, además, requiere de un tratamiento para convertir un `flujo de bits` en datos primitivos como son `int, float, double y char`.
+
+## Scanner 
+
+La clase `Scanner` nos permite obtener la entrada de datos primitivos y de tipo String, se encuentra en el paquete `java.util`.
+
+Esta clase nos permite obtener los datos de diferentes entradas, por ejemplo, taclado, un archivo de texto plano, entre otros, para mas información, puede visitar [Scanner](https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html)
+
+```java {2,7}
+//Ejemplo.java
+import java.util.Scanner;
+public class App {
+    public static void main(String[] args) {
+        // Se instancia un nuevo objeto Scanner y se indica 
+        // de donde se obtiene los datos (en este caso desde teclado )
+        Scanner entrada = new Scanner( System.in );
+    }
+}
+```
+
+### Métodos más utilizados
+
+#### nextInt() : int
+
+Lee valores int introducidos por el usuario desde teclado.
+
+```java
+//Ejemplo.java
+import java.util.Scanner;
+public class Ejemplo {
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner( System.in );
+        System.out.println("Introduce un numero entero:");
+        int entero = entrada.nextInt();
+        System.out.println( entero );
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce un numero entero:"
+10
+10
+```
+
+#### nextFloat() : float 
+
+Lee valores float introducidos por el usuario.
+
+```java
+//Ejemplo.java
+import java.util.Scanner;
+public class Ejemplo {
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner( System.in );
+        System.out.println("Introduce un numero con punto decimal:");
+        float flotante = entrada.nextFloat();
+        System.out.println( flotante );
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce un numero con punto decimal:"
+22.22
+22.22
+```
+
+#### next() : String
+
+Lee una cadena de carácter hasta el primer salto de línea o el primer espacio.
+
+```java
+//Ejemplo.java
+import java.util.Scanner;
+public class Ejemplo {
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner( System.in );
+        System.out.println("Introduce una cedena de caracteres sin espacio:");
+        String cadena = entrada.next();
+        System.out.println( cadena );
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce una cedena de caracteres sin espacio:"
+Hola_Como_Estas_?
+Hola_Como_Estas_?
+```
+
+También se puede indicar un carácter como salto de línea:
+
+```java {5}
+//Ejemplo.java
+import java.util.Scanner;
+public class App {
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner( System.in ).useDelimiter("_");
+        System.out.println("Introduce una cedena de caracteres sin espacio");
+        String cadena = entrada.next();
+        System.out.println( cadena );
+    }
+}
+```
+
+```bash title="Salida en Consola"
+"Introduce una cedena de caracteres sin espacio:"
+Hola_Como_Estas_?
+Hola
+```

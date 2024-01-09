@@ -1,0 +1,320 @@
+---
+title: Tarea 2. Socket y Flujos
+---
+
+## Programa Servidor
+
+Para poder implementar un servidor de socket en java es necesario utilizar la clase `ServerSocket` del paquete `java.net.ServerSocket`.
+
+Entonces, se instancia un objeto `ServerSocket` y se agrega a esta instancia el puerto donde escuchara el servidor, tambien se puede agregar otros valores, para más información puede visitar la página [ServerSocket](https://docs.oracle.com/javase/8/docs/api/java/net/ServerSocket.html)
+
+```java
+// App.java
+// Paquete para Instanciar un ServerSocket
+import java.io.IOException;
+import java.net.ServerSocket;
+public class App {
+    // Puerto donde escucha el servidor
+    private static final int PORT = 1001;
+    public static void main(String[] args) {
+        try {
+            // Instancia del ServerSocket
+            ServerSocket servidor = new ServerSocket( PORT );
+        }catch(IOException e) {
+            System.err.println("Error al iniciar el servidor");
+        }
+    }
+}
+```
+
+:::note[Nota]
+Se agrega un bloque de exepción `try { ...| } catch( Exception e ) { ...| }` para manejar errores al iniciar el servidor.
+:::
+
+Para aceptar la conexión con un cliente es necesario utilizar el método `accept()`, este método retorna un objeto de tipo `Socket`.
+
+### Servidor Socket
+
+Entonces, para tener una conexión con un cliente se debe tener el siguiente código:
+
+```java
+// App.java
+// Paquete para Instanciar un ServerSocket
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+public class App {
+    // Puerto donde escucha el servidor
+    private static final int PORT = 1001;
+    public static void main(String[] args) {
+        try {
+            // Instancia del ServerSocket
+            ServerSocket servidor = new ServerSocket( PORT );
+            // Cuando un cliente se conecte al servidor
+            // la variable socket almacenara la conexion con el cliente
+            Socket socket = servidor.accept();
+        }catch() {
+            System.err.println("Error al iniciar el servidor");
+        }
+    }
+}
+```
+
+:::caution[Importante]
+El código anterior **solo** acepta una conexión con un cliente, ya que, al terminar la comunicación entre el cliente y el servidor, el servidor finaliza.
+
+Para poder aceptar múltiples clientes es necesario esperar y almacenar las conexiones de cada cliente:
+
+```java {15-17}
+// App.java
+// Paquete para Instanciar un ServerSocket
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+public class App {
+    // Puerto donde escucha el servidor
+    private static final int PORT = 1001;
+    public static void main(String[] args) {
+        try {
+            // Instancia del ServerSocket
+            ServerSocket servidor = new ServerSocket( PORT );
+            // Cuando un cliente se conecte al servidor
+            // la variable socket almacenara la conexion con el cliente
+            while( true ){
+                Socket socket = servidor.accept();
+            }
+        }catch(IOException e) {
+            System.err.println("Error al iniciar el servidor");
+        }
+    }
+}
+```
+:::
+
+:::danger[Cuidado]
+Aún existe un problema, cuando varios clientes se conecten al mismo tiempo el servidor sólo podrá atender a un cliente a la vez, ya que, la forma en la que se realiza una conexión con un cliente es secuencial, se debe indicar que los clientes deben ser atendidos de manera simultánea, y para esto, se utilizan Hilos.
+
+En este caso, el hilo podrá comunicarse con un cliente determinado de la siguiente forma:
+
+```java 
+// ManejadorHilo.java
+import java.io.IOException;
+import java.net.Socket;
+public class ManejadorHilo implements Runnable {
+    // Atributos de la Clase ManejadorHilo
+    private final Socket cliente;
+    private final int contador;
+    // Metodo Constructor de la Clase ManejadorHilo
+    public ManejadorHilo(Socket cliente, int contador) {
+        this.cliente = cliente;
+        this.contador = contador;
+    }
+    // Metodo que se ejecuta de manera simultanea
+    @Override
+    public void run() {
+        // Aqui va el codigo que permite enviar y recibir datos del cliente
+    }
+    
+}
+```
+
+Para utilizar esta clase he implementar hilos que atiendan clientes de manera simultánea, se debe agregar lo siguiente en la clase App.java
+
+```java {10,13-16}
+// App.java
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+public class App {
+    private static final int PORT = 1001;
+    public static void main(String[] args) {
+        try {
+            ServerSocket servidor = new ServerSocket( PORT );
+            int i = 0;
+            while( true ){
+                Socket cliente = servidor.accept();
+                Runnable r = new ManejadorHilo(cliente, i);
+                Thread t = new Thread(r);
+                t.start();
+                i++;
+            }
+        } catch (IOException ex) {
+            System.err.println("Error al iniciar el servidor");
+        }
+    }
+}
+```
+:::
+
+### Enviar y Recibir Datos
+
+Ahora que se sabe cómo realizar una conexión con el servidor, se debe iniciar una comunicación, en este ejemplo se enviará datos de tipo String entre el cliente y el servidor.
+
+Para enviar datos se utiliza la clase `DataOutputStream` del paquete `java.io.DataInputStream`.
+
+Entonces, se instancia un objeto `DataOutputStream` y se agrega como parametro un objeto `OutputStream`, para más información puede visitar la página [DataOutputStream](https://docs.oracle.com/javase/8/docs/api/java/io/DataOutputStream.html). Para enviar datos de tipo String se utiliza el método `writeUTF( String str )`.
+
+Para obtener datos se utiliza la clase `DataInputStream` del paquete`java.io.DataInputStream`.
+
+Entonces, se instancia un objeto `DataInputStream` y se agrega como parametro un objeto `InputStream`, para más información puede visitar la página [DataInputStream](https://docs.oracle.com/javase/8/docs/api/java/io/DataInputStream.htmll). Para recibir los datos de tipo String se utiliza el método `readUTF()`.
+
+```java {11,12,15,17}
+// ComunicacionSocket.java
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+public class ComunicacionSocket {
+    public static void main( String [] args ){
+        try {
+            Socket socket = new Socket( HOST , PORT );
+
+            DataInputStream entrada = new DataInputStream( socket.getInputStream() );
+            DataOutputStream salida = new DataOutputStream( socket.getOutputStream() );
+
+            // Se recibe un dato de tipo String
+            String dato = entrada.readUTF();
+            // Se envia un adto de tipo String
+            salida.writeUTF( "Mensaje que se va he enviar" );
+            
+            salida.close();
+            entrada.close();
+            socket.close();
+            
+        } catch (IOException ex) {
+            System.err.println("Error al obtener los datos del cliente");
+        }
+    }
+}
+```
+
+### Programa Completo
+
+```java
+// ManejadorHilo.java
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+public class ManejadorHilo implements Runnable {
+    private final Socket cliente;
+    private final int contador;
+    public ManejadorHilo(Socket cliente, int contador) {
+        this.cliente = cliente;
+        this.contador = contador;
+    }
+    @Override
+    public void run() {
+        try {
+            DataInputStream entrada = new DataInputStream( cliente.getInputStream() );
+            DataOutputStream salida = new DataOutputStream( cliente.getOutputStream() );
+            System.out.println( "SE INICIO LA COMUNICACION CON EL CLIENTE : " + contador );
+            do {
+                String dato = entrada.readUTF();
+                if( dato.equalsIgnoreCase( "adios" ) ) break;
+                System.out.println( "Cliente " + contador + " dice : " + dato );
+                salida.writeUTF( "Se recibio el mensaje " + dato );
+            } while (true);
+            System.out.println("SE TERMINO LA COMUNICACION CON EL CLIENTE : " + contador);
+            salida.close();
+            entrada.close();
+            cliente.close();
+        } catch (IOException ex) {
+            System.err.println("Error al obtener los datos del cliente");
+        }
+    }
+}
+```
+
+```java
+// App.java
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+public class App {
+    private static final int PORT = 1001;
+    public static void main(String[] args) {
+        try {
+            ServerSocket servidor = new ServerSocket( PORT );
+            System.out.println( "Servidor Corriendo en el puerto " + PORT );
+            int i = 0;
+            while( true ){
+                Socket cliente = servidor.accept();
+                new Thread( (Runnable) new ManejadorHilo(cliente, i) ).start();
+                i++;
+            }
+        } catch (IOException ex) {
+            System.err.println("Error al iniciar el servidor");
+        }
+    }
+}
+```
+
+## Programa Cliente
+
+### Cliente Servidor
+
+Para poder implementar un cliente socket es necesario utilizar la clase `Socket` del paquete`java.net.Socket`.
+
+Entonces, se instancia un objeto `Socket` y se agrega como parametros la dirrecion IP del servidor socket y el puerto donde escucha el servidor, tambien se puede agregar otros valores, para más información puede visitar la página [ServerSocket](https://docs.oracle.com/javase/8/docs/api/java/net/Socket.html)
+
+```java
+// App.java
+import java.io.IOException;
+import java.net.Socket;
+
+public class App {
+    
+    private static final int PORT = 1001;
+    private static final String HOST = "localhost";
+    
+    public static void main(String[] args) {
+        try {
+            Socket cliente = new Socket( HOST , PORT );
+            cliente.close();
+        } catch (IOException ex) {
+            System.err.println("Se perdio la conexion con el servidor");
+        }
+    }
+}
+```
+
+### Programa Completo
+
+```java
+// App.java
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+public class App {
+    private static final int PORT = 1001;
+    private static final String HOST = "localhost";
+    public static void main(String[] args) {
+        try {
+            Socket cliente = new Socket( HOST , PORT );
+            DataInputStream entrada = new DataInputStream( cliente.getInputStream() );
+            DataOutputStream salida = new DataOutputStream( cliente.getOutputStream() );
+            Scanner teclado = new Scanner(System.in);
+            while( true ){
+                String mensaje = """
+                    Introduce los datos que se mandaran al servidor
+                    o (adios) para finalizar conexion: 
+                    > """;
+                System.out.print(mensaje);
+                String dato = teclado.nextLine();
+                salida.writeUTF( dato );
+                System.out.println( "El servidor dice : " + entrada.readUTF() + "\n" );
+            }
+        } catch (IOException ex) {
+            System.err.println("Se perdio la conexion con el servidor");
+        }
+    }
+}
+```
+
+## Archivos
+
+- [Programa Cliente](/public/Tareas/Tarea_2_Socket_Flujo/Cliente.rar)
+- [Programa Servidor](/public/Tareas/Tarea_2_Socket_Flujo/Servidor.rar)
