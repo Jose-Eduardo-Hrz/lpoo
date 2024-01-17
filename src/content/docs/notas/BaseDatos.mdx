@@ -1,0 +1,135 @@
+---
+title: Conexión con Base de Datos
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Decargar JDBC
+
+<Tabs>
+  <TabItem label="MYSQL">
+    https://dev.mysql.com/downloads/connector/j/
+  </TabItem>
+  <TabItem label="MariaDB">
+    Aqui estará el link para mariadb
+  </TabItem>
+</Tabs>
+
+## Clase Conexion
+
+```java 
+// Conexion.java
+import java.sql.*;
+
+public class Conexion {
+    
+    private String ADDRESS;
+    private String USER;
+    private String PASSWORD;
+    private String NAME_DB;
+    private int PORT;
+    private Connection conexion;
+    
+    public Conexion( 
+        String ADDRESS , String USER , 
+        String PASSWORD , String NAME_DB , int PORT 
+    ){
+        this.ADDRESS = ADDRESS;
+        this.USER = USER;
+        this.PASSWORD = PASSWORD;
+        this.NAME_DB = NAME_DB;
+        this.PORT = PORT;
+    }
+    
+    public Conexion(){
+        this( 
+            System.getProperty("ADDRESS") , System.getProperty("USER"), 
+            System.getProperty("PASSWORD") , System.getProperty("NAME_DB"),
+            Integer.parseInt( System.getProperty("PORT") )
+        );
+    }
+    
+    public Connection obtenerConexion() 
+        throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String URL = String.format( 
+            "jdbc:mysql://$s:$s/" , this.ADDRESS, this.PORT 
+        );
+        this.conexion = DriverManager.getConnection( 
+            URL, this.USER, this.PASSWORD 
+        );
+        return this.conexion;
+    }
+    
+    public void finalizarConexion() throws SQLException{
+        conexion.close();
+    }
+    
+}
+```
+
+## Clase Concreta 
+
+```java 
+public class Alumno {
+    
+    private int id;
+    private String nombre;
+    private String apellido;
+    private String carrera;
+    private int edad;
+    
+    public Alumno( 
+        int id , String nombre , String apellido , String carrera , int edad 
+    ){
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.carrera = carrera;
+        this.edad = edad;
+    }
+    
+    @Override
+    public String toString(){
+        return String.format( 
+            "%d %s %s %s %d" , 
+            this.id, this.nombre, this.apellido , this.carrera , this.edad 
+        );
+    }
+    
+}
+```
+
+## Objeto de Acceso a los Datos 
+
+```java 
+// AlumnoDAO.java
+import Clases.Alumno;
+import Databases.Conexion;
+import java.sql.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class AlumnoDAO {
+    
+    public static ArrayList<Alumno> obtenerTodos() 
+        throws SQLException, ClassNotFoundException {
+        Conexion conexion = new Conexion();
+        ArrayList<Alumno> alumnos = new ArrayList<>();
+        ResultSet result = conexion.obtenerConexion()
+                                    .createStatement()
+                                    .executeQuery("SELECT * FROM Horario");
+        while (result.next()) {
+            alumnos.add(
+                new Alumno( 
+                    result.getInt(1), result.getString(2), 
+                    result.getString(3), result.getString(4), result.getInt(5)
+                )
+            );
+        }
+        conexion.finalizarConexion();
+        return alumnos;
+    }
+    
+}
+```
