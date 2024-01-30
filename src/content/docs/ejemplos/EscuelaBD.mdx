@@ -1,0 +1,123 @@
+---
+title: Ejercicio Escuela
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Decargar JDBC
+
+<Tabs>
+  <TabItem label="MYSQL">
+    https://dev.mysql.com/downloads/connector/j/
+  </TabItem>
+  <TabItem label="MariaDB">
+    Aqui estará el link para mariadb
+  </TabItem>
+</Tabs>
+
+## Base de Datos 
+
+![Diagrama](/Ejemplos/diagrama.png)
+
+```sql 
+// Codigo.sql 
+CREATE DATABASE IF NOT EXISTS Escuela;
+
+USE Escuela;
+
+CREATE TABLE IF NOT EXISTS Alumno(
+    matricula VARCHAR(10) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    apellidos VARCHAR(60) NOT NULL,
+    edad int NOT NULL,
+    PRIMARY KEY (matricula)
+);
+
+CREATE TABLE IF NOT EXISTS Profesor(
+    noEconomico VARCHAR(5) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    apellidos VARCHAR(60) NOT NULL,
+    edad int NOT NULL,
+    PRIMARY KEY (noEconomico)
+);
+
+CREATE TABLE IF NOT EXISTS Materia(
+    clave VARCHAR(5) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    creditos int NOT NULL,
+    PRIMARY KEY (clave)
+);
+
+CREATE TABLE IF NOT EXISTS Horario(
+    clave VARCHAR(10) NOT NULL,
+    horaInicio VARCHAR(10) NOT NULL,
+    horaFin VARCHAR(40) NOT NULL,
+    profesor VARCHAR(5) NOT NULL,
+    materia VARCHAR(5) NOT NULL,
+    PRIMARY KEY (clave),
+    FOREIGN KEY(profesor) REFERENCES Profesor(noEconomico),
+    FOREIGN KEY(materia) REFERENCES Materia(clave)
+);
+
+CREATE TABLE Alumno_Horario(
+    id int NOT NULL AUTO_INCREMENT,
+    alumno VARCHAR(10) NOT NULL,
+    horario VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY(alumno) REFERENCES Alumno(matricula),
+    FOREIGN KEY(horario) REFERENCES Horario(clave)
+);
+```
+
+## Clase Conexion
+
+```java 
+// Conexion.java
+import java.sql.*;
+
+public class Conexion {
+    
+    private String ADDRESS;
+    private String USER;
+    private String PASSWORD;
+    private String NAME_DB;
+    private int PORT;
+    private Connection conexion;
+    
+    public Conexion( 
+        String ADDRESS , String USER , 
+        String PASSWORD , String NAME_DB , int PORT 
+    ){
+        this.ADDRESS = ADDRESS;
+        this.USER = USER;
+        this.PASSWORD = PASSWORD;
+        this.NAME_DB = NAME_DB;
+        this.PORT = PORT;
+    }
+    
+    public Conexion(){
+        this( 
+            System.getProperty("ADDRESS") , System.getProperty("USER"), 
+            System.getProperty("PASSWORD") , System.getProperty("NAME_DB"),
+            Integer.parseInt( System.getProperty("PORT") )
+        );
+    }
+    
+    public Connection obtenerConexion() 
+        throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String URL = String.format( 
+            "jdbc:mysql://$s:$s/" , this.ADDRESS, this.PORT 
+        );
+        this.conexion = DriverManager.getConnection( 
+            URL, this.USER, this.PASSWORD 
+        );
+        return this.conexion;
+    }
+    
+    public void finalizarConexion() throws SQLException{
+        conexion.close();
+    }
+    
+}
+```
