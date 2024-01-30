@@ -1,0 +1,61 @@
+---
+title: Tarea 3. Conexion a Bases de Datos
+---
+
+## Instrucciones
+
+Utilizando la siguiente base de datos:
+
+```sql
+// Codigo.sql
+CREATE DATABASE IF NOT EXISTS Escuela;
+
+USE Escuela;
+
+CREATE TABLE IF NOT EXISTS Alumno(
+    matricula VARCHAR(10) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    apellidos VARCHAR(60) NOT NULL,
+    edad int NOT NULL,
+    PRIMARY KEY (matricula)
+);
+
+CREATE TABLE IF NOT EXISTS Profesor(
+    noEconomico VARCHAR(5) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    apellidos VARCHAR(60) NOT NULL,
+    edad int NOT NULL,
+    PRIMARY KEY (noEconomico)
+);
+
+CREATE TABLE IF NOT EXISTS Materia(
+    clave VARCHAR(5) NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    creditos int NOT NULL,
+    PRIMARY KEY (clave)
+);
+```
+
+Crear un sistema que permita mostrar, agregar, eliminar y actualizar un `Alumno`, `Profesor` y `Materia`.
+
+### Aspectos a considerar
+
+Se debe contar con:
+
+1. Una clase llamada `Conexion.java` que permita obtener la conexion a la base de datos.
+
+2. Una clase llamada `AlumnoDAO.java` que permita mostrar un alumno, mostrar todos los alumnos, agregar un alumno, eliminar un alumno y actualizar un alumno.
+3. Una clase llamada `Alumno` con los atributos `matricula` , `nombre`, `apellidos` y `edad`, asi como, su metodo constructor y metodos getters y setter
+4. Una clase llamada `MenuAlumno.java` que permita agregar datos desde consola para las acciones acteriores.
+
+5. Una clase llamada `ProfesorDAO.java` que permita mostrar un profesor, mostrar todos los profesor, agregar un profesor, eliminar un profesor y actualizar un profesor.
+6. Una clase llamada `Profesor` con los atributos `noEconomico` , `nombre`, `apellidos` y `edad`, asi como, su metodo constructor y metodos getters y setter
+7. Una clase llamada `MenuProfesor.java` que permita agregar datos desde consola para las acciones acteriores.
+
+8. Una clase llamada `MateriaDAO.java` que permita mostrar una materia, mostrar todos las materia, agregar una materia, eliminar una materia y actualizar una materia.
+9. Una clase llamada `Materia` con los atributos `clave` , `nombre` y `creditos`, asi como, su metodo constructor y metodos getters y setter
+10. Una clase llamada `MenuMateria.java` que permita agregar datos desde consola para las acciones acteriores.
+
+:::caution[Importante]
+La base de esta tarea en breve se mostrara en esta sección
+:::
