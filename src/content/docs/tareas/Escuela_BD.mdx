@@ -2,6 +2,8 @@
 title: Tarea 3. Conexion a Bases de Datos
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 ## Instrucciones
 
 Utilizando la siguiente base de datos:
@@ -64,3 +66,181 @@ La base de esta tarea la puedes descargar en la siguiente liga: [Tarea 3. Escuel
 :::caution[Importante]
 NO ES NECESARIO AGREGAR EL ARCHIVO PDF
 :::
+
+## Requerimientos
+
+Para esta tarea es necesario contar con las siguientes tecnologias:
+
+1. Editor de Codigo, como [Apache NetBeans](https://netbeans.apache.org/front/main/), [Eclipse](https://www.eclipse.org/downloads/) o [Visual Studio Code](https://code.visualstudio.com/)
+2. El Kit de Desarrollo Java [JDK](https://www.oracle.com/mx/java/technologies/downloads/)
+3. Un gestor de bases de datos como [MariaDB](https://mariadb.org/), [Mysql](https://www.mysql.com/) o entornos de desarrollo como [XAMPP](https://www.apachefriends.org/es/index.html) o [wampserver](https://www.wampserver.com/en/)
+4. Un driver JDBC para conectarse a la base de datos.
+
+## Configuraciones
+
+Dentro del gestor de bases de datos, se debe agregar el [código SQL](/tareas/escuela_bd/#instrucciones) para crear la base de datos.
+
+Para verificar que se creo la base de datos desde consola se utiliza la siguiente instruccion:
+
+```bash title="Consola"
+show databases;
+```
+
+Para utilizar la base de datos desde consola se utiliza la siguiente instruccion:
+
+```bash title="Consola"
+use Escuela;
+```
+
+Para mostrar las tablas de la base de datos desde consola se utiliza la siguiente instruccion:
+
+```bash title="Consola"
+show tables;
+```
+
+Para observar los atributos de cada tabla desde consola se utiliza la siguiente instruccion:
+
+```bash title="Consola"
+/* Mostrar la descripcion de la tabla Alumno */;
+describe Alumno;
+
+/* Mostrar la descripcion de la tabla Profesor */;
+describe Profesor;
+
+/* Mostrar la descripcion de la tabla Materia */;
+describe Materia;
+```
+
+:::tip[Sugerencia]
+Si no puedes instalar una base de datos te recomiendo utilizar un gestor de bases de datos online, por ejemplo:
+- [Railway](https://railway.app/new)
+:::
+
+## Desarrollo 
+
+### Clase Conexion.java 
+
+Para este ejemplo, las instrucciones que permiten conectarse a la base de datos seran agregadas en la clase `Conexion.java `. Para esto, dentro del proyecto se debe crear un paquete llamado `BaseDatos` y dentro de este paquete, crear la clase `Conexion.java`.
+
+Dentro de esta clase, se importa el siguiente paquete:
+
+```java 
+// Paquete que contiene objetos y metodos para 
+// manejar conexion con la base de datos
+import java.sql.*;
+```
+
+Dentro de esta clase, se agrega los siguiente atributos:
+
+```java 
+// Direccion IP del Gestor de Bases de Datos,
+// si el getor de base de datos es local
+// la direccion IP es localhost
+private String ADDRESS;
+// Usuario con el que se inicia sesion en la
+// base de datos
+private String USER;
+// Constraseña con el que se inicia sesion en la
+// base de datos
+private String PASSWORD;
+// Nombre de la base de datos a la que se quiere 
+// conectar
+private String NAME_DB;
+// Puerto del gestor de la base de datos
+// normalmente se utiliza el puerto 3306
+private int PORT;
+// Objeto que permite conectarse a la base de datos 
+private Connection conexion;
+```
+
+Se debe agregar un constructor que permita obtener los datos para la conexion con la base de datos:
+
+```java 
+public Conexion( 
+    String ADDRESS , String USER , String PASSWORD , String NAME_DB , int PORT 
+){
+    this.ADDRESS = ADDRESS;
+    this.USER = USER;
+    this.PASSWORD = PASSWORD;
+    this.NAME_DB = NAME_DB;
+    this.PORT = PORT;
+}
+```
+
+:::danger[Cuidado]
+Para entornos de producción no se recomienda utilizar este constructor, ya que, expone datos sensibles que pueden afectar la seguridad del sistema.
+
+Por ejemplo, si desde una clase principal llamada `App.java` se instancia un objeto de tipo `Conexion.java`, la instancia se veria de la siguinete manera:
+
+```java 
+//Conexion.java
+public class App {
+    public static void main(String[] args) {
+        // Instancia de la conexion
+        Conexion conexion = new Conexion(
+            "localhost", "root", "root", "Escuela", 3306
+        );
+    }
+}
+```
+
+Como se observa, queda expueta la información de la base de datos.
+
+En producción o desarrollo se recomienda utilizar propiedades del sistema, como en el siguiente constructor:
+```java 
+public Conexion(){
+    this(
+        System.getProperty("ADDRESS") , 
+        System.getProperty("USER"),
+        System.getProperty("PASSWORD") , 
+        System.getProperty("NAME_DB"),
+        Integer.parseInt( System.getProperty("PORT") )
+    );
+}
+```
+
+Por ejemplo, si desde una clase principal llamada `App.java` se instancia un objeto de tipo `Conexion.java`, la instancia se veria de la siguinete manera:
+
+```java 
+//Conexion.java
+public class App {
+    public static void main(String[] args) {
+        // Instancia de la conexion
+        Conexion conexion = new Conexion();
+    }
+}
+```
+
+¿De donde se obtiene los datos?. Desde el sistema operativo. Con esto, nos aseguramos de que los datos solo pueden ser observados por personas con privilegios de administrador.
+:::
+
+Se debe agregar un metodo que permita obtener una conexion a la base de datos, OJO 👀👀, el driver para conectarse a bases de datos MYSQL es muy diferente al driver de MariaDB:
+
+<Tabs>
+  <TabItem label="MYSQL">
+    ```java
+    public Connection obtenerConexion()
+        throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String URL = String.format(
+            "jdbc:mysql://%s:%s/%s" , this.ADDRESS, this.PORT,this.NAME_DB
+        );
+        this.conexion = DriverManager.getConnection(URL, this.USER, this.PASSWORD);
+        return this.conexion;
+    }
+    ```
+  </TabItem>
+  <TabItem label="MariaDB">
+    ```java
+    public Connection obtenerConexion()
+        throws ClassNotFoundException, SQLException{
+        Class.forName("org.mariadb.jdbc.Driver");
+        String URL = String.format(
+            "jdbc:mariadb://%s:%s/%s" , this.ADDRESS, this.PORT,this.NAME_DB
+        );
+        this.conexion = DriverManager.getConnection(URL, this.USER, this.PASSWORD);
+        return this.conexion;
+    }
+    ```
+  </TabItem>
+</Tabs>
