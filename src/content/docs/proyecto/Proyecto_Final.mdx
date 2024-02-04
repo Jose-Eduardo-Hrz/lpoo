@@ -1,0 +1,304 @@
+---
+title: Proyecto Final
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Instrucciones
+
+Utilizando la siguiente base de datos:
+
+![Diagrama BD](/Proyecto_Final/Modelo_BD.png)
+
+:::tip[Sugerencia]
+Puedes descargar la base de datos en la siguiente liga [Descargar Base de Datos](/Proyecto_Final/codigo.sql), tambien, pudes descargar los datos de prueba en la siguiente liga [Descargar Datos de Prueba](/Proyecto_Final/datos.sql).
+:::
+
+Y utilizando los diagramas de clases:
+
+![Diagrama BD](/Proyecto_Final/Diagrama_Clases_1.png)
+
+:::tip[Sugerencia]
+Puedes descargar la base de este proyecto en la siguiente liga [Descargar Proyecto Base](/Proyecto_Final)
+:::
+
+Crear un sistema que permita mostrar, agregar, eliminar y actualizar un Alumno, Carrera, Registro, Horario, Materia, Profesor, Asignacion y Ayudante.
+
+### Aspectos a Considerar
+
+Se debe contar con:
+
+1. Una clase llamada `Conexion.java` que permita obtener la conexion a la base de datos.
+
+2. Una clase llamada `AlumnoDAO.java` que permita mostrar un alumno, mostrar todos los alumnos, agregar un alumno, eliminar un alumno y actualizar un alumno.
+3. Una clase llamada `Alumno.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+4. Una clase llamada `MenuAlumno.java` que permita agregar datos desde consola para las acciones anteriores.
+
+5. Una clase llamada `CarreraDAO.java` que permita mostrar una carrera, mostrar todos las carreras, agregar una carrera, eliminar una carrera y actualizar una carrera.
+6. Una clase llamada `Carrera.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+7. Una clase llamada `MenuCarrera.java` que permita agregar datos desde consola para las acciones anteriores.
+
+8. Una clase llamada `RegistroDAO.java` que permita mostrar un registro, mostrar todos los registros, agregar un registro, eliminar un registro y actualizar un registro.
+9. Una clase llamada `Registro.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+10. Una clase llamada `MenuRegistro.java` que permita agregar datos desde consola para las acciones anteriores.
+
+11. Una clase llamada `HorarioDAO.java` que permita mostrar un horario, mostrar todos los horarios, agregar un horario, eliminar un horario y actualizar un horario.
+12. Una clase llamada `Horario.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+13. Una clase llamada `MenuHorario.java` que permita agregar datos desde consola para las acciones anteriores.
+
+14. Una clase llamada `MateriaDAO.java` que permita mostrar una materia, mostrar todas las materias, agregar una materia, eliminar una materia y actualizar una materia.
+15. Una clase llamada `Materia.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+16. Una clase llamada `MenuMateria.java` que permita agregar datos desde consola para las acciones anteriores.
+
+17. Una clase llamada `ProfesorDAO.java` que permita mostrar un profesor, mostrar todas los profesores, agregar un profesor, eliminar un profesor y actualizar un profesor.
+18. Una clase llamada `Profesor.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+19. Una clase llamada `MenuProfesor.java` que permita agregar datos desde consola para las acciones anteriores.
+
+20. Una clase llamada `AsignacionDAO.java` que permita mostrar una asignacion, mostrar todas las asignaciones, agregar una asignacion, eliminar una asignacion y actualizar una asignacion.
+21. Una clase llamada `Asignacion.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+22. Una clase llamada `MenuAsignacion.java` que permita agregar datos desde consola para las acciones anteriores.
+
+23. Una clase llamada `AyudanteDAO.java` que permita mostrar un ayudante, mostrar todas los ayudantes, agregar una ayudante, eliminar un ayudante y actualizar un ayudante.
+24. Una clase llamada `Ayudante.java` con los `atributos` descritos en el modelo de clase, asi como, su metodo `constructor` y metodos `getters` y `setter`.
+25. Una clase llamada `MenuAyudante.java` que permita agregar datos desde consola para las acciones anteriores.
+
+:::caution[Importante]
+NO ES NECESARIO AGREGAR EL ARCHIVO PDF
+:::
+
+## Requerimientos
+
+Para este proyecto es necesario contar con las siguientes tecnologias:
+
+1. Editor de Codigo, como [Apache NetBeans](https://netbeans.apache.org/front/main/), [Eclipse](https://www.eclipse.org/downloads/) o [Visual Studio Code](https://code.visualstudio.com/)
+2. El Kit de Desarrollo Java [JDK](https://www.oracle.com/mx/java/technologies/downloads/)
+3. Un gestor de bases de datos como [MariaDB](https://mariadb.org/), [Mysql](https://www.mysql.com/) o entornos de desarrollo como [XAMPP](https://www.apachefriends.org/es/index.html) o [wampserver](https://www.wampserver.com/en/)
+4. Un driver JDBC para conectarse a la base de datos.
+    - Driver para base de datos MYSQL [Link de descarga](/Proyecto_Final/mysql-connector-j-8.3.0.jar)
+    - Driver para base de datos MariaDB [Link de descarga](/Proyecto_Final/mariadb-java-client-3.3.2.jar)
+
+## Desarrollo 
+
+### Clase Conexion.java 
+
+Para este proyectp, las instrucciones que permiten conectarse a la base de datos seran agregadas en la clase `Conexion.java `. Para esto, dentro del proyecto se debe crear un paquete llamado `BaseDatos` y dentro de este paquete, crear la clase `Conexion.java`.
+
+```java 
+// /src/BaseDatos/Conexion.java
+package BaseDatos;
+
+import java.sql.*;
+
+public class Conexion {
+
+    private String ADDRESS;
+    private String USER;
+    private String PASSWORD;
+    private String NAME_DB;
+    private int PORT;
+    private Connection conexion;
+
+    public Conexion(
+        String ADDRESS, String USER, 
+        String PASSWORD, String NAME_DB, int PORT
+    ) {
+        this.ADDRESS = ADDRESS;
+        this.USER = USER;
+        this.PASSWORD = PASSWORD;
+        this.NAME_DB = NAME_DB;
+        this.PORT = PORT;
+    }
+
+    public Conexion() {
+        this(
+            System.getProperty("ADDRESS"), 
+            System.getProperty("USER"),
+            System.getProperty("PASSWORD"), 
+            System.getProperty("NAME_DB"),
+            Integer.parseInt(System.getProperty("PORT"))
+        );
+    }
+
+    public Connection obtenerConexion() 
+        throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String URL = String.format( 
+            "jdbc:mysql://%s:%s/%s", this.ADDRESS, this.PORT, this.NAME_DB 
+        );
+        this.conexion = DriverManager.getConnection(
+            URL, this.USER, this.PASSWORD
+        );
+        return this.conexion;
+    }
+    
+    public void finalizarConexion() throws SQLException{
+        if( conexion != null ){
+            conexion.close();
+        }
+    }
+
+}
+
+```
+
+:::caution[Importante]
+El driver para conectarse a bases de datos MYSQL es muy diferente al driver de MariaDB:
+
+<Tabs>
+  <TabItem label="MYSQL">
+    ```java
+    public Connection obtenerConexion()
+        throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String URL = String.format(
+            "jdbc:mysql://%s:%s/%s" , this.ADDRESS, this.PORT,this.NAME_DB
+        );
+        this.conexion = DriverManager.getConnection(
+            URL, this.USER, this.PASSWORD
+        );
+        return this.conexion;
+    }
+    ```
+  </TabItem>
+  <TabItem label="MariaDB">
+    ```java
+    public Connection obtenerConexion()
+        throws ClassNotFoundException, SQLException{
+        Class.forName("org.mariadb.jdbc.Driver");
+        String URL = String.format(
+            "jdbc:mariadb://%s:%s/%s" , this.ADDRESS, this.PORT,this.NAME_DB
+        );
+        this.conexion = DriverManager.getConnection(
+            URL, this.USER, this.PASSWORD
+        );
+        return this.conexion;
+    }
+    ```
+  </TabItem>
+</Tabs>
+:::
+
+### Clase Abstracta Persona.java 
+
+```java 
+// src/ClasesAbstractas/Persona.java
+package ClasesAbstractas;
+public abstract class Persona {
+    private String nombres;
+    private String apellido_paterno;
+    private String apellido_materno;
+    private int edad;
+    public Persona(
+        String nombres, String apellido_paterno, 
+        String apellido_materno, int edad
+    ) {
+        this.nombres = nombres;
+        this.apellido_paterno = apellido_paterno;
+        this.apellido_materno = apellido_materno;
+        this.edad = edad;
+    }
+    // Aqui van los getters y setters
+    @Override
+    public String toString() {
+        return String.format( 
+            "%-20s | %-15s | %-15s | %-4s" , 
+            this.nombres , 
+            this.apellido_paterno , 
+            this.apellido_materno , 
+            this.edad
+        );
+    }
+}
+```
+
+### Clase Ayudante.java 
+
+```java 
+// src/Clases/Ayudante.java
+package Clases;
+import ClasesAbstractas.Persona;
+public class Ayudante extends Persona{
+    private int numero_economico;
+    public Ayudante(
+        int numero_economico, String nombres, 
+        String apellido_paterno, String apellido_materno, int edad
+    ){
+        super(nombres, apellido_paterno, apellido_materno, edad);
+        this.numero_economico = numero_economico;
+    }
+    // Aqui van los metodos getters y setters
+    @Override
+    public String toString() {
+        return String.format( 
+            "| %-10s | %s |", 
+            this.numero_economico, 
+            super.toString() 
+        );
+    }
+}
+```
+
+### Clase Profesor.java 
+
+```java 
+// src/Clases/Profesor.java
+package Clases;
+import ClasesAbstractas.Persona;
+public class Profesor extends Persona{
+    private int numero_economico;
+    public Profesor(
+        int numero_economico, String nombres, 
+        String apellido_paterno, String apellido_materno, 
+        int edad
+    ) {
+        super(nombres, apellido_paterno, apellido_materno, edad);
+        this.numero_economico = numero_economico;
+    }
+    // Aqui van los getters y setters
+    @Override
+    public String toString() {
+        return String.format( 
+            "| %-10s | %s |", 
+            this.numero_economico, 
+            super.toString() 
+        );
+    }
+}
+```
+
+### Clase Asignacion.java 
+
+```java 
+// src/Clases/Asignacion.java
+package Clases;
+public class Asignacion {
+    private int id;
+    private Profesor profesor;
+    private Ayudante ayudante;
+    public Asignacion(int id, Profesor profesor, Ayudante ayudante) {
+        this.id = id;
+        this.profesor = profesor;
+        this.ayudante = ayudante;
+    }
+    // Aqui van los getters y setters
+    @Override
+    public String toString() {
+        return String.format("| %-3s | %s | %s |" , 
+            this.id , 
+            String.format(
+                "%-20s | %-15s | %-15s", 
+                this.profesor.getNombres(), 
+                this.profesor.getApellido_paterno(), 
+                this.profesor.getApellido_materno()
+            ),
+            String.format(
+                "%-20s | %-15s | %-15s", 
+                this.ayudante.getNombres(), 
+                this.ayudante.getApellido_paterno(), 
+                this.ayudante.getApellido_materno()
+            )
+        );
+    }
+}
+```
+

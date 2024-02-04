@@ -21,6 +21,10 @@ export default defineConfig({
 					label: 'Ejercicios',
 					autogenerate: { directory: 'ejemplos' },
 				},
+				{
+					label: 'Proyecto Final',
+					autogenerate: { directory: 'proyecto' },
+				},
 			],
 		}),
 	],
