@@ -283,8 +283,8 @@ public class Asignacion {
     // Aqui van los getters y setters
     @Override
     public String toString() {
-        return String.format("| %-3s | %s | %s |" , 
-            this.id , 
+        return String.format("| %-3s | %s | %s |", 
+            this.id, 
             String.format(
                 "%-20s | %-15s | %-15s", 
                 this.profesor.getNombres(), 
@@ -302,3 +302,214 @@ public class Asignacion {
 }
 ```
 
+### Clase AyudanteDAO.java 
+
+```java 
+// src/DAO/AyudanteDAO.java
+package DAO;
+import BaseDatos.Conexion;
+import Clases.Ayudante;
+import Utileria.Funciones;
+import java.sql.*;
+import java.util.ArrayList;
+public class AyudanteDAO {
+    public static ArrayList<Ayudante> obtenerTodos(){
+        /** Codigo */
+    }
+    public static Ayudante obtenerUno( 
+        int numero_economico , ArrayList<Ayudante> ayudantes 
+    ){
+        /** Codigo */
+    }
+    public static void agregar( 
+        Ayudante nuevoAyudante , ArrayList<Ayudante> ayudantes 
+    ){
+        /** Codigo */
+    }
+    public static void eliminar( 
+        int numero_economico , ArrayList<Ayudante> ayudantes
+    ) {
+        /** Codigo */
+    }
+    public static void actualizar( 
+        Ayudante ayudante , ArrayList<Ayudante> ayudantes 
+    ){
+        /** Codigo */
+    }
+}
+```
+
+#### Metodo obtenerTodos()
+
+```java 
+public static ArrayList<Ayudante> obtenerTodos(){
+    ArrayList<Ayudante> ayudantes = new ArrayList<>();
+    Conexion conexion = new Conexion( 
+        "localhost" , "root" , "root" , "Escuela" , 3306 
+    );
+    try {
+        ResultSet result = conexion
+            .obtenerConexion()
+            .createStatement()
+            .executeQuery("SELECT * FROM Ayudante");
+        while( result.next() ){
+            ayudantes.add(
+                new Ayudante( 
+                    result.getInt(1),result.getString(2), 
+                    result.getString(3),result.getString(4), 
+                    result.getInt(5) )
+            );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println(
+            "Ocurrio un error al cargar el driver de mysql"
+        );
+    } catch (SQLException ex) {
+        System.out.println(
+            "Ocurrio un error al obtener todos los ayudantes"
+        );
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println(
+                "No se logro cerrar la conexion con la base de datos"
+            );
+        }
+    }
+    return ayudantes;
+}
+```
+
+#### Metodo obtenerUno( ... )
+
+```java 
+public static Ayudante obtenerUno( 
+    int numero_economico , ArrayList<Ayudante> ayudantes 
+){
+    Ayudante a = Funciones.obtenerAyudante( 
+        numero_economico , ayudantes
+    );
+    return a;
+}
+```
+
+#### Metodo agregar( ... )
+
+```java 
+public static void agregar( 
+    Ayudante nuevoAyudante , ArrayList<Ayudante> ayudantes 
+){
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "INSERT INTO Ayudante VALUES( ? , ? , ? , ? , ? )", 
+                Statement.RETURN_GENERATED_KEYS
+            );
+        st.setInt(1, nuevoAyudante.getNumero_economico() );
+        st.setString(2, nuevoAyudante.getNombres());            
+        st.setString(3, nuevoAyudante.getApellido_paterno());            
+        st.setString(4, nuevoAyudante.getApellido_materno());            
+        st.setInt(5, nuevoAyudante.getEdad());
+        st.executeUpdate();
+        ResultSet result = st.getGeneratedKeys();
+        if( result.next() ){
+            nuevoAyudante.setNumero_economico( result.getInt(1) );
+            ayudantes.add( nuevoAyudante );
+        }
+    } catch (SQLException ex) {
+        System.out.println(ex);
+        System.out.println(
+            "Error al agregar un nuevo ayudante"
+            );
+    } catch (ClassNotFoundException ex) {
+        System.out.println(
+            "No se logro cargar el controlador JDBC"
+        );
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println(
+                "Error al cerrar la conexion con la base de datos"
+            );
+        }
+    }
+}
+```
+
+#### Metodo eliminar( ... )
+
+```java 
+public static void eliminar( 
+    int numero_economico , ArrayList<Ayudante> ayudantes
+) {
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "DELETE FROM Ayudante WHERE numero_economico = ?"
+            );
+        st.setInt(1, numero_economico);
+        int delete = st.executeUpdate();
+        if (delete > 0) {
+            System.out.println(
+                "Se elimino al alumno correctamente"
+            );
+            Ayudante a = Funciones.obtenerAyudante(
+                numero_economico, ayudantes
+            );
+            ayudantes.remove(a);
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println(
+            "No se logro cargar el controlador JDBC"
+        );
+    } catch (SQLException ex) {
+        System.out.println("Error al eliminar al alumno");
+    }
+}
+```
+
+#### Metodo actualizar( ... )
+
+```java 
+public static void actualizar( Ayudante ayudante , ArrayList<Ayudante> ayudantes ){
+    Conexion conexion = new Conexion("localhost", "root", "root", "Escuela", 3306);
+    PreparedStatement st;
+    try {
+        st = conexion
+        .obtenerConexion()
+        .prepareStatement(
+            "UPDATE Ayudante SET nombres = ? , apellido_paterno = ? , apellido_materno = ? , edad = ? WHERE numero_economico = ?"
+        );
+        st.setString(1, ayudante.getNombres() );
+        st.setString(2, ayudante.getApellido_paterno() );
+        st.setString(3, ayudante.getApellido_materno() );
+        st.setInt(4, ayudante.getEdad());            
+        st.setInt(5, ayudante.getNumero_economico() );
+        int insert = st.executeUpdate();
+        if (insert > 0) {
+            System.out.println("Se actualizo al ayudante correctamente");
+            Ayudante a = Funciones.obtenerAyudante( ayudante.getNumero_economico() , ayudantes);
+            a.setNombres( ayudante.getNombres() );
+            a.setApellido_paterno( ayudante.getApellido_paterno() );                
+            a.setApellido_materno(ayudante.getApellido_materno() );
+            a.setEdad( ayudante.getEdad() );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } catch (SQLException ex) {
+        System.out.println("Error al actualizar al ayudante");
+    }
+}
+```
