@@ -302,6 +302,48 @@ public class Asignacion {
 }
 ```
 
+### Clase Funciones.java 
+
+```java 
+// src/Utileria/Funciones.java 
+package Utileria;
+import Clases.*;
+import java.util.ArrayList;
+public class Funciones {
+    public static Ayudante obtenerAyudante( 
+        int numero_economico , ArrayList<Ayudante> ayudantes 
+    ){
+        for( Ayudante a : ayudantes ){
+            if ( a.getNumero_economico() == numero_economico ){
+                return a;
+            }
+        }
+        return null;
+    }
+    public static Profesor obtenerProfesor( 
+        int numero_economico , ArrayList<Profesor> profesores 
+    ){
+        for( Profesor p : profesores ){
+            if ( p.getNumero_economico() == numero_economico ){
+                return p;
+            }
+        }
+        return null;
+    }
+    public static Asignacion obtenerAsignacion( 
+        int id , ArrayList<Asignacion> asignaciones 
+    ){
+        for( Asignacion a : asignaciones ){
+            if ( a.getId() == id ){
+                return a;
+            }
+        }
+        return null;
+    }
+}
+
+```
+
 ### Clase AyudanteDAO.java 
 
 ```java 
@@ -513,3 +555,412 @@ public static void actualizar( Ayudante ayudante , ArrayList<Ayudante> ayudantes
     }
 }
 ```
+
+### Clase ProfesorDAO.java 
+
+```java
+// src/DAO/ProfesorDAO.java
+package DAO;
+
+import BaseDatos.Conexion;
+import Clases.Profesor;
+import Utileria.Funciones;
+import java.sql.*;
+import java.util.ArrayList;
+
+public class ProfesorDAO {
+    public static ArrayList<Profesor> obtenerTodos(){
+        /** Codigo */
+    }
+    public static Profesor obtenerUno( 
+        int numero_economico , ArrayList<Profesor> profesores 
+    ){
+        /** Codigo */
+    }
+    public static void agregar( 
+        Profesor nuevoProfesor , ArrayList<Profesor> profesores 
+    ){
+        /** Codigo */
+    }
+    public static void eliminar( 
+        int numero_economico , ArrayList<Profesor> profesores
+    ){
+        /** Codigo */
+    }
+    public static void actualizar( 
+        Profesor profesor , ArrayList<Profesor> profesores 
+    ){
+        /** Codigo */
+    }
+}
+```
+
+#### Metodo obtenerTodos()
+
+```java
+public static ArrayList<Profesor> obtenerTodos(){
+    ArrayList<Profesor> profesores = new ArrayList<>();
+    Conexion conexion = new Conexion( 
+        "localhost" , "root" , "root" , "Escuela" , 3306 
+    );
+    try {
+        ResultSet result = conexion
+            .obtenerConexion()
+            .createStatement()
+            .executeQuery("SELECT * FROM Profesor");
+        while( result.next() ){
+            profesores.add(
+                new Profesor( 
+                    result.getInt(1) , 
+                    result.getString(2) , 
+                    result.getString(3) , 
+                    result.getString(4) , 
+                    result.getInt(5) 
+                )
+            );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println(
+            "Ocurrio un error al cargar el driver de mysql"
+        );
+    } catch (SQLException ex) {
+        System.out.println(
+            "Ocurrio un error al obtener todos los ayudantes"
+        );
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println(
+                "No se logro cerrar la conexion con la base de datos"
+            );
+        }
+    }
+    return profesores;
+}
+```
+
+#### Metodo obtenerUno( ... )
+
+```java
+public static Profesor obtenerUno( 
+    int numero_economico , ArrayList<Profesor> profesores 
+){
+    Profesor p = Funciones.obtenerProfesor(numero_economico , profesores);
+    return p;
+}
+```
+
+#### Metodo agregar( ... )
+
+```java
+public static void agregar( 
+    Profesor nuevoProfesor , ArrayList<Profesor> profesores 
+){
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "INSERT INTO Profesor VALUES( ? , ? , ? , ? , ? )", 
+                Statement.RETURN_GENERATED_KEYS
+            );
+        st.setInt(1, nuevoProfesor.getNumero_economico() );
+        st.setString(2, nuevoProfesor.getNombres());            
+        st.setString(3, nuevoProfesor.getApellido_paterno());            
+        st.setString(4, nuevoProfesor.getApellido_materno());            
+        st.setInt(5, nuevoProfesor.getEdad());
+        st.executeUpdate();
+        ResultSet result = st.getGeneratedKeys();
+        if( result.next() ){
+            nuevoProfesor.setNumero_economico( result.getInt(1) );
+            profesores.add( nuevoProfesor );
+        }
+    } catch (SQLException ex) {
+        System.out.println(ex);
+        System.out.println("Error al agregar un nuevo profesor");
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println(
+                "Error al cerrar la conexion con la base de datos"
+            );
+        }
+    }
+}
+```
+
+#### Metodo eliminar( ... )
+
+```java
+public static void eliminar( 
+    int numero_economico , ArrayList<Profesor> profesores
+) {
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement("DELETE FROM Profesor WHERE numero_economico = ?");
+        st.setInt(1, numero_economico);
+        int delete = st.executeUpdate();
+        if (delete > 0) {
+            System.out.println("Se elimino al profesor correctamente");
+            Profesor p = Funciones.obtenerProfesor(numero_economico, profesores);
+            profesores.remove(p);
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } catch (SQLException ex) {
+        System.out.println("Error al eliminar al profesor");
+    }
+}  
+```
+
+#### Metodo actualizar( ... )
+
+```java
+public static void actualizar( 
+    Profesor profesor , ArrayList<Profesor> profesores 
+){
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+        );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "UPDATE Profesor SET nombres = ? , apellido_paterno = ? , apellido_materno = ? , edad = ? WHERE numero_economico = ?"
+            );
+        st.setString(1, profesor.getNombres() );
+        st.setString(2, profesor.getApellido_paterno() );
+        st.setString(3, profesor.getApellido_materno() );
+        st.setInt(4, profesor.getEdad());            
+        st.setInt(5, profesor.getNumero_economico() );
+        int insert = st.executeUpdate();
+        if (insert > 0) {
+            System.out.println("Se actualizo al profesor correctamente");
+            Profesor p = Funciones
+                .obtenerProfesor(profesor.getNumero_economico() , profesores);
+            p.setNombres( profesor.getNombres() );
+            p.setApellido_paterno( profesor.getApellido_paterno() );                
+            p.setApellido_materno(profesor.getApellido_materno() );
+            p.setEdad( profesor.getEdad() );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } catch (SQLException ex) {
+        System.out.println("Error al actualizar al profesor");
+    }
+}
+```
+
+### Clase AsignacionDAO.java 
+
+```java
+// src/DAO/AsignacionDAO.java
+package DAO;
+
+import BaseDatos.Conexion;
+import Clases.*;
+import Utileria.Funciones;
+import java.sql.*;
+import java.util.ArrayList;
+
+public class AsignacionDAO {
+    public static ArrayList<Asignacion> obtenerTodos( 
+        ArrayList<Profesor> profesores , ArrayList<Ayudante> ayudantes 
+    ){
+        /** Codigo */
+    }
+    public static Asignacion obtenerUno( 
+        int id , ArrayList<Asignacion> asignaciones 
+    ){
+        /** Codigo */
+    }
+    public static void agregar( 
+        Asignacion nuevaAsignacion , ArrayList<Asignacion> asignaciones 
+    ){
+        /** Codigo */
+    }
+    public static void eliminar( 
+        int id , ArrayList<Asignacion> asignaciones 
+    ){
+        /** Codigo */
+    }
+    public static void actualizar( 
+        Asignacion asignacion , ArrayList<Asignacion> asignaciones 
+    ){
+        /** Codigo */
+    }
+}
+```
+
+#### Metodo obtenerTodos( ... )
+
+```java 
+public static ArrayList<Asignacion> obtenerTodos( 
+    ArrayList<Profesor> profesores , ArrayList<Ayudante> ayudantes 
+){
+    ArrayList<Asignacion> asignaciones = new ArrayList<>();
+    Conexion conexion = new Conexion( 
+        "localhost" , "root" , "root" , "Escuela" , 3306 
+    );
+    try {
+        ResultSet result = conexion
+            .obtenerConexion()
+            .createStatement()
+            .executeQuery("SELECT * FROM Asignacion");
+        while( result.next() ){
+            int id = result.getInt(1);
+            int idProfesor = result.getInt(2);
+            int idAyudante = result.getInt(3);
+            Ayudante ayudante = Funciones.obtenerAyudante(idAyudante , ayudantes );
+            Profesor profesor = Funciones.obtenerProfesor(idProfesor, profesores);
+            if( ayudante == null && profesor == null ){
+                continue;
+            }
+            asignaciones.add(
+                new Asignacion(id, profesor, ayudante)
+            );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("Ocurrio un error al cargar el driver de mysql");
+    } catch (SQLException ex) {
+        System.out.println("Ocurrio un error al obtener todas las asignaciones");
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println("No se logro cerrar la conexion con la base de datos");
+        }
+    }
+    return asignaciones;
+}
+```
+
+#### Metodo obtenerUno( ... )
+
+```java 
+public static Asignacion obtenerUno( 
+    int id , ArrayList<Asignacion> asignaciones 
+){
+    Asignacion a = Funciones.obtenerAsignacion(id, asignaciones);
+    return a;
+}
+```
+
+#### Metodo agregar( ... )
+
+```java 
+public static void agregar( 
+    Asignacion nuevaAsignacion , ArrayList<Asignacion> asignaciones 
+){
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "INSERT INTO Asignacion VALUES( 0 , ? , ? )", 
+                Statement.RETURN_GENERATED_KEYS
+            );
+        st.setInt(1, nuevaAsignacion.getProfesor().getNumero_economico() );           
+        st.setInt(2, nuevaAsignacion.getAyudante().getNumero_economico() );
+        st.executeUpdate();
+        ResultSet result = st.getGeneratedKeys();
+        if( result.next() ){
+            nuevaAsignacion.setId( result.getInt(1) );
+            asignaciones.add( nuevaAsignacion );
+        }
+    } catch (SQLException ex) {
+        System.out.println(ex);
+        System.out.println("Error al agregar una nueva asignacion");
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } finally {
+        try {
+            conexion.finalizarConexion();
+        } catch (SQLException ex) {
+            System.out.println(
+                "Error al cerrar la conexion con la base de datos"
+            );
+        }
+    }
+}
+```
+
+#### Metodo eliminar( ... )
+
+```java 
+public static void eliminar( 
+    int id , ArrayList<Asignacion> asignaciones 
+) {
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+    );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement("DELETE FROM Asignacion WHERE idAsignacion = ?");
+        st.setInt(1, id );
+        int delete = st.executeUpdate();
+        if (delete > 0) {
+            System.out.println("Se elimino la asignacion correctamente");
+            Asignacion a = Funciones.obtenerAsignacion(id, asignaciones);
+            asignaciones.remove(a);
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } catch (SQLException ex) {
+        System.out.println("Error al eliminar la asignacion");
+    }
+}
+```
+
+#### Metodo actualizar( ... )
+
+```java 
+public static void actualizar( 
+    Asignacion asignacion , ArrayList<Asignacion> asignaciones 
+){
+    Conexion conexion = new Conexion(
+        "localhost", "root", "root", "Escuela", 3306
+        );
+    PreparedStatement st;
+    try {
+        st = conexion
+            .obtenerConexion()
+            .prepareStatement(
+                "UPDATE Asignacion SET profesor = ? , ayudante = ? WHERE idAsignacion = ?"
+            );
+        st.setInt(1, asignacion.getProfesor().getNumero_economico() );            
+        st.setInt(2, asignacion.getAyudante().getNumero_economico() );
+        st.setInt(3, asignacion.getId());
+        int insert = st.executeUpdate();
+        if (insert > 0) {
+            System.out.println("Se actualizo la asignacion correctamente");
+            Asignacion a = Funciones.obtenerAsignacion( asignacion.getId() , asignaciones);
+            a.setProfesor( asignacion.getProfesor() );
+            a.setAyudante( asignacion.getAyudante() );
+        }
+    } catch (ClassNotFoundException ex) {
+        System.out.println("No se logro cargar el controlador JDBC");
+    } catch (SQLException ex) {
+        System.out.println("Error al actualizar la asignacion");
+    }
+}
+```
+
